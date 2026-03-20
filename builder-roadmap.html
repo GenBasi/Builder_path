@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Builder Roadmap — 24 Settimane</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FAFAF8;
+  --bg2: #F2F1ED;
+  --bg3: #EAEAE6;
+  --text: #1A1A18;
+  --text2: #6B6B66;
+  --text3: #9C9C96;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.15);
+  --p1: #534AB7; --p1bg: #EEEDFE; --p1t: #3C3489;
+  --p2: #0F6E56; --p2bg: #E1F5EE; --p2t: #085041;
+  --p3: #D85A30; --p3bg: #FAECE7; --p3t: #712B13;
+  --p4: #185FA5; --p4bg: #E6F1FB; --p4t: #0C447C;
+  --accent: #534AB7;
+  --success: #0F6E56;
+  --warn: #BA7517;
+  --font: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141413; --bg2: #1E1E1C; --bg3: #2A2A27;
+    --text: #E8E7E2; --text2: #A3A39D; --text3: #6B6B66;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.15);
+    --p1bg: #26215C; --p1t: #CECBF6;
+    --p2bg: #04342C; --p2t: #9FE1CB;
+    --p3bg: #4A1B0C; --p3t: #F5C4B3;
+    --p4bg: #042C53; --p4t: #B5D4F4;
+  }
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; }
+.app { max-width: 1100px; margin: 0 auto; padding: 20px; }
+
+/* Header */
+.header { padding: 32px 0 24px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+.header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; }
+.header p { font-size: 14px; color: var(--text2); }
+.stats-row { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+.stat-card { background: var(--bg2); border-radius: 10px; padding: 12px 16px; min-width: 120px; }
+.stat-label { font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-value { font-size: 22px; font-weight: 700; margin-top: 2px; }
+.stat-value.purple { color: var(--p1); }
+.stat-value.green { color: var(--success); }
+.stat-value.orange { color: var(--p3); }
+.progress-global { margin-top: 16px; }
+.progress-global-bar { height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.progress-global-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--p1), var(--p2), var(--p3), var(--p4)); transition: width 0.5s; }
+.progress-global-label { font-size: 12px; color: var(--text3); margin-top: 4px; }
+
+/* Layout */
+.main { display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
+@media (max-width: 860px) { .main { grid-template-columns: 1fr; } }
+
+/* Controls */
+.controls { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.ctrl-btn { font-family: var(--font); font-size: 12px; font-weight: 500; padding: 5px 14px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; transition: all 0.15s; }
+.ctrl-btn:hover { border-color: var(--text3); color: var(--text); }
+.ctrl-btn.on { color: var(--text); background: var(--bg2); border-color: var(--text3); }
+.ctrl-btn.on[data-p="0"] { background: var(--p1bg); color: var(--p1t); border-color: var(--p1); }
+.ctrl-btn.on[data-p="1"] { background: var(--p2bg); color: var(--p2t); border-color: var(--p2); }
+.ctrl-btn.on[data-p="2"] { background: var(--p3bg); color: var(--p3t); border-color: var(--p3); }
+.ctrl-btn.on[data-p="3"] { background: var(--p4bg); color: var(--p4t); border-color: var(--p4); }
+
+/* Graph */
+.graph-wrap { background: var(--bg2); border-radius: 14px; border: 1px solid var(--border); overflow: hidden; }
+#graph-container { width: 100%; }
+
+/* Legend */
+.legend { display: flex; gap: 14px; flex-wrap: wrap; padding: 10px 14px; font-size: 11px; color: var(--text3); border-bottom: 1px solid var(--border); }
+.leg-item { display: flex; align-items: center; gap: 5px; }
+.leg-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* Side Panel */
+.side { display: flex; flex-direction: column; gap: 0; max-height: calc(100vh - 80px); position: sticky; top: 20px; }
+.side-placeholder { display: flex; align-items: center; justify-content: center; height: 300px; background: var(--bg2); border-radius: 14px; border: 1px solid var(--border); color: var(--text3); font-size: 14px; text-align: center; padding: 20px; }
+.detail-card { background: var(--bg2); border-radius: 14px; border: 1px solid var(--border); overflow-y: auto; max-height: calc(100vh - 80px); display: none; }
+.detail-card.open { display: block; }
+
+.dc-header { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg2); z-index: 2; }
+.dc-week { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 6px; display: inline-block; margin-bottom: 6px; }
+.dc-title { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+.dc-phase { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+/* Progress tracker */
+.dc-progress { padding: 12px 20px; border-bottom: 1px solid var(--border); }
+.dc-progress-row { display: flex; align-items: center; gap: 10px; }
+.dc-progress-bar { flex: 1; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.dc-progress-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+.dc-progress-label { font-size: 12px; font-weight: 500; color: var(--text2); min-width: 36px; text-align: right; }
+.dc-status-btns { display: flex; gap: 6px; margin-top: 8px; }
+.status-btn { font-family: var(--font); font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border2); background: transparent; color: var(--text3); cursor: pointer; transition: all 0.15s; }
+.status-btn:hover { border-color: var(--text3); }
+.status-btn.active { background: var(--success); color: #fff; border-color: var(--success); }
+.status-btn.active.in-progress { background: var(--warn); border-color: var(--warn); }
+.status-btn.active.not-started { background: var(--bg3); color: var(--text2); border-color: var(--border2); }
+
+.dc-body { padding: 16px 20px; }
+.dc-section { margin-bottom: 16px; }
+.dc-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text3); margin-bottom: 6px; }
+.dc-topic { font-size: 13px; color: var(--text); padding: 4px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+.dc-topic:last-child { border: none; }
+.dc-build-item { font-size: 13px; color: var(--text); padding: 4px 0; line-height: 1.5; }
+.dc-outcome { font-size: 13px; color: var(--text); line-height: 1.6; background: var(--bg); border-radius: 8px; padding: 10px 14px; }
+.dc-deps { display: flex; flex-wrap: wrap; gap: 4px; }
+.dc-dep { font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 6px; cursor: pointer; transition: opacity 0.15s; }
+.dc-dep:hover { opacity: 0.8; }
+
+/* Resources */
+.res-item { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.res-item:last-child { border: none; }
+.res-type { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 6px; border-radius: 4px; margin-right: 6px; vertical-align: middle; }
+.rt-video { background: #FCEBEB; color: #791F1F; }
+.rt-docs { background: #E6F1FB; color: #0C447C; }
+.rt-course { background: #E1F5EE; color: #085041; }
+.rt-tool { background: #FAEEDA; color: #633806; }
+.rt-practice { background: #EEEDFE; color: #3C3489; }
+@media (prefers-color-scheme: dark) {
+  .rt-video { background: #501313; color: #F09595; }
+  .rt-docs { background: #042C53; color: #85B7EB; }
+  .rt-course { background: #04342C; color: #5DCAA5; }
+  .rt-tool { background: #412402; color: #FAC775; }
+  .rt-practice { background: #26215C; color: #AFA9EC; }
+}
+.res-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.res-desc { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+/* Notes */
+.dc-notes { padding: 0 20px 16px; }
+.dc-notes textarea { width: 100%; min-height: 80px; font-family: var(--font); font-size: 13px; color: var(--text); background: var(--bg); border: 1px solid var(--border2); border-radius: 8px; padding: 10px 12px; resize: vertical; line-height: 1.5; outline: none; transition: border-color 0.15s; }
+.dc-notes textarea:focus { border-color: var(--accent); }
+.dc-notes-saved { font-size: 11px; color: var(--success); margin-top: 4px; opacity: 0; transition: opacity 0.3s; }
+.dc-notes-saved.show { opacity: 1; }
+
+/* Checklist */
+.check-item { display: flex; align-items: flex-start; gap: 8px; padding: 4px 0; font-size: 13px; color: var(--text); cursor: pointer; }
+.check-item input { margin-top: 3px; accent-color: var(--success); cursor: pointer; }
+.check-item.done { color: var(--text3); text-decoration: line-through; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>Builder Roadmap</h1>
+    <p>24 settimane per diventare un AI-native product builder</p>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Completate</div><div class="stat-value green" id="s-done">0</div></div>
+      <div class="stat-card"><div class="stat-label">In corso</div><div class="stat-value orange" id="s-prog">0</div></div>
+      <div class="stat-card"><div class="stat-label">Settimane</div><div class="stat-value purple">24</div></div>
+      <div class="stat-card"><div class="stat-label">Note scritte</div><div class="stat-value" id="s-notes" style="color:var(--text)">0</div></div>
+    </div>
+    <div class="progress-global">
+      <div class="progress-global-bar"><div class="progress-global-fill" id="g-fill" style="width:0%"></div></div>
+      <div class="progress-global-label" id="g-label">0% completato</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="ctrl-btn on" data-p="-1" onclick="filt(-1,this)">Tutte</button>
+    <button class="ctrl-btn" data-p="0" onclick="filt(0,this)">Foundations</button>
+    <button class="ctrl-btn" data-p="1" onclick="filt(1,this)">Build mode</button>
+    <button class="ctrl-btn" data-p="2" onclick="filt(2,this)">Product mode</button>
+    <button class="ctrl-btn" data-p="3" onclick="filt(3,this)">Autonomy</button>
+  </div>
+
+  <div class="main">
+    <div class="graph-col">
+      <div class="graph-wrap">
+        <div class="legend">
+          <div class="leg-item"><div class="leg-dot" style="background:var(--p1)"></div>Foundations (1-6)</div>
+          <div class="leg-item"><div class="leg-dot" style="background:var(--p2)"></div>Build mode (7-12)</div>
+          <div class="leg-item"><div class="leg-dot" style="background:var(--p3)"></div>Product mode (13-18)</div>
+          <div class="leg-item"><div class="leg-dot" style="background:var(--p4)"></div>Autonomy (19-24)</div>
+        </div>
+        <div id="graph-container"></div>
+      </div>
+    </div>
+    <div class="side">
+      <div class="side-placeholder" id="placeholder">Clicca su un nodo del grafo per vedere i dettagli, le risorse e aggiungere note</div>
+      <div class="detail-card" id="detail"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const dk=matchMedia('(prefers-color-scheme:dark)').matches;
+const R=22, W=660, H=580;
+const pc=['#534AB7','#0F6E56','#D85A30','#185FA5'];
+const pf=dk?['#3C3489','#085041','#712B13','#0C447C']:['#EEEDFE','#E1F5EE','#FAECE7','#E6F1FB'];
+const ps=dk?['#AFA9EC','#5DCAA5','#F0997B','#85B7EB']:['#534AB7','#0F6E56','#993C1D','#185FA5'];
+const ptL=['#26215C','#04342C','#4A1B0C','#042C53'];
+const ptD=['#EEEDFE','#E1F5EE','#FAECE7','#E6F1FB'];
+const pn=['Foundations','Build mode','Product mode','Autonomy'];
+const pbg=dk?['#26215C','#04342C','#4A1B0C','#042C53']:['#EEEDFE','#E1F5EE','#FAECE7','#E6F1FB'];
+const ptx=dk?['#CECBF6','#9FE1CB','#F5C4B3','#B5D4F4']:['#3C3489','#085041','#712B13','#0C447C'];
+
+const N=[
+{id:1,label:"Setup + Git",phase:0,topics:["Come funziona una web app","Frontend vs backend vs database","Cos'e una API e il deployment","Git: init, add, commit, push, clone","Terminal: cd, ls, mkdir, rm, cat","VS Code: estensioni e shortcuts","Browser DevTools base"],build:["Workspace ordinata con cartelle","Account GitHub professionale","Primo commit + push","Clona e leggi 2-3 repo open source"],outcome:"Sai usare terminale, Git e capisci il flusso di una web app",resources:[{type:"course",name:"The Odin Project — Foundations",desc:"Percorso gratuito completo per le basi web"},{type:"video",name:"Fireship — Git in 100 seconds",desc:"Panoramica velocissima di Git"},{type:"docs",name:"GitHub Docs — Get started",desc:"Documentazione ufficiale GitHub"},{type:"tool",name:"VS Code + GitLens extension",desc:"Setup editor ottimale"},{type:"practice",name:"GitHub Learning Lab",desc:"Tutorial interattivi su Git e GitHub"}]},
+{id:2,label:"HTML + CSS",phase:0,topics:["Struttura HTML semantica","Tag: div, section, header, nav, form","Input, button, img, a, ul/ol","CSS: selettori, box model","Flexbox layout completo","Spacing: margin, padding, gap","Responsive design con media queries","Gerarchia visiva e tipografia"],build:["Landing page personale","Pagina 'join community'","Pagina evento responsive"],outcome:"Replichi layout semplici senza panico",resources:[{type:"course",name:"freeCodeCamp — Responsive Web Design",desc:"Certificazione gratuita HTML/CSS"},{type:"video",name:"Kevin Powell — CSS Flexbox",desc:"Canale YouTube top per CSS"},{type:"docs",name:"MDN Web Docs — HTML/CSS",desc:"Riferimento completo Mozilla"},{type:"practice",name:"CSS Battles",desc:"Sfide per praticare CSS"},{type:"tool",name:"Figma Community templates",desc:"Ispirati a layout esistenti"}]},
+{id:3,label:"JS fundamentals",phase:0,topics:["Variabili: let, const, var","Tipi: string, number, boolean","Array e metodi: push, pop, slice","Oggetti e proprietà","Funzioni: declaration, arrow, callback","Condizioni: if/else, switch, ternario","Loop: for, while, for...of","map(), filter(), reduce()","DOM: querySelector, createElement","Eventi: click, submit, input","fetch() base per chiamate API"],build:["To-do list in JS puro","Expense tracker base","Filtro card/eventi","Form con validazione minima"],outcome:"Leggi e scrivi logica JavaScript senza copiare alla cieca",resources:[{type:"course",name:"JavaScript.info — Modern Tutorial",desc:"Il miglior tutorial JS gratuito"},{type:"video",name:"Traversy Media — JS Crash Course",desc:"2 ore di JS pratico"},{type:"docs",name:"MDN — JavaScript Guide",desc:"Documentazione completa"},{type:"practice",name:"Exercism — JavaScript track",desc:"Esercizi con mentor review"},{type:"practice",name:"30 Days of JavaScript",desc:"Sfide giornaliere progressive"}]},
+{id:4,label:"JS async + API",phase:0,topics:["Scope e closure","Callback e callback hell","Promises: resolve, reject, then, catch","async/await pattern","Destructuring oggetti e array","Spread/rest operator","Moduli ES: import/export","Error handling: try/catch","Fetch con API REST pubbliche","JSON: parse e stringify"],build:["Mini app che chiama un'API pubblica","Ricerca eventi dinamica","Pagina con card generate da API"],outcome:"Capisci il flusso dei dati asincroni",resources:[{type:"video",name:"Fireship — Async/Await",desc:"Spiegazione rapidissima"},{type:"docs",name:"MDN — Using Promises",desc:"Guida approfondita promises"},{type:"practice",name:"Public APIs list (GitHub)",desc:"Lista API gratuite per praticare"},{type:"tool",name:"Thunder Client (VS Code)",desc:"Testa API nell'editor"},{type:"course",name:"JavaScript.info — Async",desc:"Capitolo dedicato async/await"}]},
+{id:5,label:"TypeScript",phase:0,topics:["Tipi primitivi: string, number, boolean","Array e tuple tipizzati","Interfaces e type aliases","Union types e literal types","Funzioni tipizzate","Optional properties e nullability","Type inference automatica","Generics base","Differenza pratica JS vs TS"],build:["Riscrivi un mini progetto in TypeScript","Tipizza dati utenti, eventi, profili"],outcome:"Sai leggere e modificare un progetto TypeScript moderno",resources:[{type:"docs",name:"TypeScript Handbook",desc:"Documentazione ufficiale progressiva"},{type:"course",name:"Total TypeScript — Beginners",desc:"Matt Pocock, corso gratuito"},{type:"video",name:"Fireship — TS in 100 seconds",desc:"Overview ultra-rapida"},{type:"practice",name:"Type Challenges (GitHub)",desc:"Sfide di tipizzazione"},{type:"tool",name:"TS Playground",desc:"Testa TypeScript nel browser"}]},
+{id:6,label:"Git avanzato",phase:0,topics:["Branch: create, switch, delete","Merge e risoluzione conflitti","Pull request workflow","Gitignore e file sensibili","README professionale","Issue tracking e project board","Console errors e stack trace","Network tab nel browser","Debugging step by step"],build:["Crea branch feature + merge","README pulito per un progetto","Debugging di 3 bug reali"],outcome:"Ti senti uno che lavora su progetti veri",resources:[{type:"video",name:"Fireship — Git for Pros",desc:"Workflow Git avanzato"},{type:"docs",name:"Conventional Commits",desc:"Standard per commit messages"},{type:"practice",name:"Oh My Git! (game)",desc:"Gioco per imparare Git"},{type:"tool",name:"GitHub CLI (gh)",desc:"Gestisci PR da terminale"},{type:"docs",name:"Chrome DevTools Docs",desc:"Debugging professionale"}]},
+{id:7,label:"React base",phase:1,topics:["Componenti funzionali","Props e children","useState per stato locale","Rendering condizionale","Rendering liste con map + key","Gestione eventi onClick, onChange","Composizione componenti","Component tree e data flow"],build:["Mini dashboard: navbar, card list","Filtro interattivo","Form semplice con state","Modale base"],outcome:"Spezzi una UI in componenti riutilizzabili",resources:[{type:"docs",name:"React.dev — Official Tutorial",desc:"Tutorial ufficiale React"},{type:"video",name:"Jack Herrington — React",desc:"Canale YouTube React moderno"},{type:"course",name:"Scrimba — Learn React",desc:"Corso interattivo gratuito"},{type:"practice",name:"React Challenges",desc:"Esercizi pratici React"},{type:"tool",name:"React DevTools extension",desc:"Ispeziona componenti nel browser"}]},
+{id:8,label:"React pratico",phase:1,topics:["useEffect per side effects","Data fetching con useEffect","Lifting state up pattern","Controlled vs uncontrolled forms","Component structure e folder","Loading, error, empty states","Custom hooks base"],build:["Mini app eventi/opportunita","Directory builder con filtri","Form multi-step base"],outcome:"Costruisci interfacce vicine a casi reali",resources:[{type:"docs",name:"React.dev — Managing State",desc:"Guida ufficiale gestione stato"},{type:"video",name:"Theo — React Best Practices",desc:"Pattern moderni React"},{type:"course",name:"ui.dev — React",desc:"Corso approfondito (ottimo)"},{type:"practice",name:"Build your own app",desc:"Costruisci qualcosa di tuo"},{type:"tool",name:"TanStack Query",desc:"Libreria data fetching"}]},
+{id:9,label:"Next.js",phase:1,topics:["App Router e file-based routing","Layout e nested layouts","Server vs Client components","Route handlers (API routes)","Loading.tsx e error.tsx","Environment variables","Link e navigazione","Struttura progetto consigliata"],build:["Progetto Next.js multi-pagina","Pagina opportunity","Form contatto","Navigazione tra pagine"],outcome:"Apri un progetto Next.js e ti orienti subito",resources:[{type:"docs",name:"Next.js Docs — App Router",desc:"Documentazione ufficiale"},{type:"course",name:"Next.js Learn (official)",desc:"Tutorial interattivo Vercel"},{type:"video",name:"Lee Robinson — Next.js",desc:"VP Vercel, video pratici"},{type:"tool",name:"create-next-app",desc:"Scaffolding ufficiale"},{type:"practice",name:"Vercel Templates",desc:"Template da studiare"}]},
+{id:10,label:"SQL + DB design",phase:1,topics:["SELECT, WHERE, ORDER BY","GROUP BY e aggregate functions","JOIN: inner, left, right","INSERT, UPDATE, DELETE","Primary key e foreign key","Relazioni: 1-1, 1-N, N-N","Schema design e normalizzazione","Index e performance"],build:["Schema piattaforma eventi","Schema expense tracker","Schema community builder","Schema candidature"],outcome:"Ogni app e anche un modello dati",resources:[{type:"course",name:"SQLBolt — Interactive SQL",desc:"Tutorial interattivo gratuito"},{type:"practice",name:"PostgreSQL Exercises",desc:"Esercizi SQL progressivi"},{type:"docs",name:"Supabase SQL Editor",desc:"Pratica SQL in Supabase"},{type:"video",name:"Fireship — SQL in 100 seconds",desc:"Overview rapida"},{type:"tool",name:"DrawSQL",desc:"Disegna schemi visualmente"}]},
+{id:11,label:"Supabase",phase:1,topics:["Creare progetto Supabase","Creare tabelle da dashboard","Auth: signup, login, session","Storage per file e immagini","Row Level Security (concetto)","Query dal frontend con SDK","Insert e select da React/Next"],build:["Collega Next.js a Supabase","Tabella users/profiles","Tabella events","Lettura + inserimento da form"],outcome:"Il prodotto diventa reale con backend vero",resources:[{type:"docs",name:"Supabase Docs",desc:"Documentazione ufficiale"},{type:"video",name:"Supabase YouTube Channel",desc:"Tutorial step-by-step"},{type:"course",name:"Supabase Crash Course",desc:"Setup completo in 1 ora"},{type:"tool",name:"Supabase Dashboard",desc:"UI per DB, auth, storage"},{type:"practice",name:"Build a CRUD app",desc:"Tutorial pratico CRUD"}]},
+{id:12,label:"Auth + CRUD",phase:1,topics:["Signup/login flow completo","Gestione sessione utente","Protected routes pattern","Ruoli utente base","Authorization vs authentication","CRUD completo","Error handling nelle operazioni"],build:["App: registrazione + login","Profilo utente editabile","CRUD contenuti completo","Lista contenuti con filtri"],outcome:"Prima vera app base funzionante",resources:[{type:"docs",name:"Supabase Auth Docs",desc:"Guida completa auth"},{type:"video",name:"Full-stack app tutorial",desc:"Auth + CRUD pratico"},{type:"practice",name:"Costruisci la tua app",desc:"Applica tutto"},{type:"tool",name:"Supabase Auth Helpers",desc:"Auth in Next.js"},{type:"docs",name:"Next.js Middleware",desc:"Proteggere route"}]},
+{id:13,label:"UX/UI basics",phase:2,topics:["User flow mapping","Information architecture","Gerarchia visiva e spacing","Call to action efficaci","Empty state design","Onboarding utente","Dashboard layout patterns","Responsive avanzato","Accessibilita base"],build:["Ridisegna una tua app","Migliora navigazione","Feedback utente: toast, stati"],outcome:"Le tue app sembrano prodotti, non demo",resources:[{type:"course",name:"Refactoring UI (book)",desc:"Il libro piu pratico per UI"},{type:"video",name:"DesignCourse — UI/UX",desc:"YouTube design per dev"},{type:"docs",name:"Apple HIG",desc:"Human Interface Guidelines"},{type:"tool",name:"Figma (free tier)",desc:"Wireframe e prototipi"},{type:"practice",name:"Redesign challenge",desc:"Migliora un'app esistente"}]},
+{id:14,label:"Form + upload",phase:2,topics:["Validazione form client-side","Validazione server-side","Messaggi di errore chiari","Loading states ovunque","Optimistic UI pattern","File upload con Supabase","Gestione immagini/avatar","Edge cases"],build:["Upload immagine profilo","Form robusti con feedback","Loading/error/empty states"],outcome:"Interfacce usabili nel mondo reale",resources:[{type:"docs",name:"React Hook Form",desc:"Form performanti React"},{type:"docs",name:"Zod — Schema validation",desc:"Validazione TypeScript-first"},{type:"video",name:"Theo — Form validation",desc:"Best practice form"},{type:"tool",name:"Supabase Storage Docs",desc:"Upload file"},{type:"practice",name:"Form complesso",desc:"Multi-step con upload"}]},
+{id:15,label:"API + backend",phase:2,topics:["HTTP methods: GET, POST, PATCH, DELETE","JSON struttura e parsing","Validazione lato server","Error handling e status codes","Route handlers Next.js","Distinzione client/server","Rate limiting","Sicurezza base: CORS"],build:["Endpoint creare eventi","Endpoint recuperare profili","Endpoint candidature","Endpoint aggiornare dashboard"],outcome:"Ragioni come chi costruisce sistemi",resources:[{type:"docs",name:"Next.js Route Handlers",desc:"API routes ufficiale"},{type:"video",name:"Fireship — RESTful API",desc:"REST spiegato chiaro"},{type:"tool",name:"Postman / Thunder Client",desc:"Testa le tue API"},{type:"docs",name:"HTTP Status Codes",desc:"Riferimento MDN"},{type:"practice",name:"REST API completa",desc:"CRUD endpoints"}]},
+{id:16,label:"Deploy",phase:2,topics:["Deploy su Vercel","Environment variables produzione","Gestione errori production","Dominio custom","Log e monitoring","Workflow locale > GitHub > deploy","CI/CD concetto","Preview deployments"],build:["Pubblica 1 landing page","Pubblica 1 web app","Configura dominio custom"],outcome:"Sei uno che pubblica prodotti online",resources:[{type:"docs",name:"Vercel Docs — Deployments",desc:"Guida ufficiale"},{type:"video",name:"Lee Robinson — Deploy",desc:"Deploy pratico"},{type:"tool",name:"Vercel Dashboard",desc:"Gestisci deploy"},{type:"tool",name:"Namecheap / Porkbun",desc:"Domini economici"},{type:"practice",name:"Pubblica tutto",desc:"Ogni progetto online"}]},
+{id:17,label:"Analytics",phase:2,topics:["Metriche: activation, retention","Funnel analysis","Click tracking e eventi","North star metric","Comportamento utente","Cosa misurare in un MVP","Drop-off points","A/B testing concetto"],build:["North star metric per un'app","5 eventi chiave","Funnel base","Drop-off points"],outcome:"Unisci data science e product thinking",resources:[{type:"tool",name:"Plausible Analytics",desc:"Analytics privacy-friendly"},{type:"docs",name:"PostHog Docs",desc:"Product analytics open source"},{type:"video",name:"Lenny's Podcast — Metrics",desc:"Metriche prodotti tech"},{type:"course",name:"Amplitude Academy",desc:"Corso gratuito analytics"},{type:"practice",name:"Definisci metriche",desc:"Applica ai tuoi progetti"}]},
+{id:18,label:"AI workflow",phase:2,topics:["Prompting per coding efficace","Dare contesto a Claude Code","Spezzare task grandi","Chiedere refactor mirati","Chiedere test e documentazione","GPT/Gemini come planner","Claude come implementer","Verificare output AI"],build:["Playbook: nuove feature","Playbook: bug fixing","Playbook: refactor","Playbook: code review","Playbook: documentazione"],outcome:"Lavori 3-5x piu veloce con AI",resources:[{type:"docs",name:"Anthropic Prompt Engineering",desc:"Guida ufficiale prompting"},{type:"tool",name:"Claude Code (CLI)",desc:"Coding agent terminale"},{type:"tool",name:"Cursor IDE",desc:"Editor con AI integrata"},{type:"video",name:"AI-assisted coding",desc:"Pattern pratici dev + AI"},{type:"practice",name:"Costruisci il tuo playbook",desc:"Template per ogni task"}]},
+{id:19,label:"Architecture",phase:3,topics:["Struttura app: moduli e servizi","Separazione responsabilita","Schema dati prima del codice","Trade-off tecnici","Documentare architettura","Feature prioritization","Risk assessment tecnico","Technical spec writing"],build:["Per 2 idee: design doc completo","Schema dati dettagliato","Architettura documentata","Flussi e rischi"],outcome:"Pensi da founder tecnico",resources:[{type:"docs",name:"System Design Primer",desc:"Intro system design"},{type:"video",name:"Theo — How to plan projects",desc:"Planning first"},{type:"practice",name:"2 design doc completi",desc:"Problema > schema > arch"},{type:"tool",name:"Excalidraw",desc:"Diagrammi veloci"},{type:"docs",name:"Architecture Decision Records",desc:"Template decisioni"}]},
+{id:20,label:"Progetto 1",phase:3,topics:["Full-stack build completo","Community/event platform","Integrare tutte le skill","Product thinking applicato","User testing base"],build:["Homepage community","Directory eventi","Submit opportunity","Auth + profilo","Dashboard + admin"],outcome:"Primo progetto portfolio pubblicato",resources:[{type:"practice",name:"Costruisci end-to-end",desc:"Progetta e costruisci tu"},{type:"tool",name:"Linear / GitHub Projects",desc:"Gestisci task"},{type:"docs",name:"Vercel + Supabase starter",desc:"Template partenza"},{type:"video",name:"Build in public",desc:"Condividi progresso"},{type:"tool",name:"Loom",desc:"Registra demo video"}]},
+{id:21,label:"Rifinitura P1",phase:3,topics:["Search e filtri avanzati","UX polish","Gestione immagini","Ruoli e permessi","Stato candidature","Analytics integrata","README professionale","Demo video"],build:["Search/filter","UX migliorata","Ruoli e stati","README + screenshot","Demo video 2 min"],outcome:"Progetto da mostrare con orgoglio",resources:[{type:"docs",name:"Awesome README",desc:"Esempi README eccellenti"},{type:"tool",name:"OBS Studio",desc:"Demo video gratis"},{type:"practice",name:"User testing 3 persone",desc:"Raccogli feedback"},{type:"video",name:"How to write case study",desc:"Struttura presentazione"},{type:"tool",name:"Shields.io",desc:"Badge README"}]},
+{id:22,label:"Progetto 2 AI",phase:3,topics:["Chiamate API modelli LLM","Prompt templating","Output strutturati JSON","Gestione errori e costi","Streaming responses","UX dell'AI nel prodotto","Rate limiting e caching"],build:["Tool AI: idea > roadmap","O expense categorizer AI","O builder assistant","O knowledge organizer"],outcome:"Secondo progetto con AI integrata",resources:[{type:"docs",name:"Anthropic API Docs",desc:"Documentazione Claude API"},{type:"docs",name:"OpenAI API Docs",desc:"Alternativa confronto"},{type:"video",name:"AI SDK by Vercel",desc:"Streaming AI in Next.js"},{type:"tool",name:"AI SDK (ai package)",desc:"Integra LLM in app"},{type:"practice",name:"Tool AI utile a te",desc:"Il miglior progetto"}]},
+{id:23,label:"Polish + test",phase:3,topics:["Refactor: naming, struttura","Leggibilita codice","Test minimi (unit test)","Documentazione interna","Onboarding utente","Checklist pre-release","Accessibilita","Performance base"],build:["Pulisci entrambi i progetti","Struttura cartelle","README completo","Stack e future improvements"],outcome:"Presenti bene quello che hai fatto",resources:[{type:"docs",name:"Testing Library",desc:"Test React components"},{type:"video",name:"Theo — Code quality",desc:"Codice leggibile"},{type:"tool",name:"ESLint + Prettier",desc:"Linting automatico"},{type:"practice",name:"Refactora progetto vecchio",desc:"Applica tutto"},{type:"docs",name:"Lighthouse",desc:"Audit performance"}]},
+{id:24,label:"Portfolio",phase:3,topics:["Portfolio design","Branding e posizionamento","Storytelling tecnico","Case study per progetto","GitHub profile README","Identita builder","Networking e visibilita"],build:["Sito portfolio live","Link GitHub + demo","Case study x2","GitHub profile curato"],outcome:"AI-native product builder con portfolio",resources:[{type:"practice",name:"Pubblica il portfolio",desc:"Deve essere live"},{type:"video",name:"Portfolio inspiration",desc:"Cerca ispirazione"},{type:"tool",name:"Vercel + Next.js",desc:"Stack perfetto"},{type:"docs",name:"GitHub Profile README",desc:"Personalizza profilo"},{type:"practice",name:"Scrivi 2 case study",desc:"Problema > soluzione > result"}]}
+];
+
+const E=[
+{s:1,t:2},{s:2,t:3},{s:3,t:4},{s:4,t:5},{s:5,t:6},
+{s:3,t:7},{s:5,t:7},{s:6,t:7},{s:7,t:8},{s:8,t:9},{s:4,t:10},{s:9,t:11},{s:10,t:11},{s:11,t:12},
+{s:2,t:13},{s:12,t:13},{s:8,t:14},{s:12,t:14},{s:4,t:15},{s:11,t:15},{s:9,t:16},{s:12,t:16},
+{s:15,t:16},{s:16,t:17},{s:17,t:18},
+{s:15,t:19},{s:19,t:20},{s:12,t:20},{s:13,t:20},{s:20,t:21},{s:17,t:21},
+{s:18,t:22},{s:19,t:22},{s:21,t:23},{s:22,t:23},{s:23,t:24},{s:6,t:24},{s:1,t:6}
+];
+
+// Persistence
+function loadData(){try{return JSON.parse(localStorage.getItem('roadmap_data'))||{};}catch(e){return {};}}
+function saveData(d){localStorage.setItem('roadmap_data',JSON.stringify(d));}
+let data=loadData();
+if(!data.status) data.status={};
+if(!data.notes) data.notes={};
+if(!data.checks) data.checks={};
+
+function updateStats(){
+  let done=0,prog=0,notes=0;
+  for(let i=1;i<=24;i++){
+    if(data.status[i]==='done') done++;
+    else if(data.status[i]==='progress') prog++;
+    if(data.notes[i]&&data.notes[i].trim()) notes++;
+  }
+  document.getElementById('s-done').textContent=done;
+  document.getElementById('s-prog').textContent=prog;
+  document.getElementById('s-notes').textContent=notes;
+  const pct=Math.round(done/24*100);
+  document.getElementById('g-fill').style.width=pct+'%';
+  document.getElementById('g-label').textContent=pct+'% completato — '+done+' di 24 settimane';
+  updateNodeVisuals();
+}
+
+// Graph
+const gc=document.getElementById('graph-container');
+const svg=d3.select('#graph-container').append('svg').attr('width','100%').attr('viewBox',`0 0 ${W} ${H}`);
+svg.append('defs').html(`<marker id="ah" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M2 2L10 6L2 10" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>`);
+
+const linkData=E.map(e=>({source:e.s,target:e.t}));
+const sim=d3.forceSimulation(N)
+  .force('link',d3.forceLink(linkData).id(d=>d.id).distance(68).strength(0.35))
+  .force('charge',d3.forceManyBody().strength(-350))
+  .force('x',d3.forceX(d=>80+d.phase*155).strength(0.4))
+  .force('y',d3.forceY(d=>{const off=d.id-[1,7,13,19][d.phase];return 65+off*85;}).strength(0.14))
+  .force('center',d3.forceCenter(W/2,H/2))
+  .force('collide',d3.forceCollide(36));
+
+const linkG=svg.append('g');
+const nodeG=svg.append('g');
+
+const links=linkG.selectAll('path').data(linkData).join('path')
+  .attr('fill','none')
+  .attr('stroke',dk?'#5F5E5A':'#B4B2A9')
+  .attr('stroke-width',1)
+  .attr('marker-end','url(#ah)')
+  .style('opacity',0.45);
+
+const gN=nodeG.selectAll('g').data(N).join('g')
+  .style('cursor','pointer')
+  .call(d3.drag()
+    .on('start',(ev,d)=>{if(!ev.active)sim.alphaTarget(0.3).restart();d.fx=d.x;d.fy=d.y;})
+    .on('drag',(ev,d)=>{d.fx=ev.x;d.fy=ev.y;})
+    .on('end',(ev,d)=>{if(!ev.active)sim.alphaTarget(0);d.fx=null;d.fy=null;}))
+  .on('click',(ev,d)=>showDetail(d));
+
+// Done ring
+gN.append('circle').attr('class','done-ring').attr('r',R+4)
+  .attr('fill','none').attr('stroke','transparent').attr('stroke-width',2.5);
+
+gN.append('circle').attr('class','node-circle').attr('r',R)
+  .attr('fill',d=>pf[d.phase])
+  .attr('stroke',d=>ps[d.phase])
+  .attr('stroke-width',1.5);
+
+gN.append('text').text(d=>d.id)
+  .attr('text-anchor','middle').attr('dominant-baseline','central')
+  .attr('font-family','DM Sans, sans-serif')
+  .attr('font-size','12px').attr('font-weight',700)
+  .attr('fill',d=>dk?ptD[d.phase]:ptL[d.phase]);
+
+gN.append('text').text(d=>d.label)
+  .attr('text-anchor','middle').attr('dy',R+13)
+  .attr('font-family','DM Sans, sans-serif')
+  .attr('font-size','10px').attr('font-weight',400)
+  .attr('fill',dk?'#9C9C96':'#6B6B66');
+
+function updateNodeVisuals(){
+  gN.select('.done-ring')
+    .attr('stroke',d=>{
+      const s=data.status[d.id];
+      if(s==='done') return '#0F6E56';
+      if(s==='progress') return '#BA7517';
+      return 'transparent';
+    })
+    .attr('stroke-dasharray',d=>data.status[d.id]==='progress'?'4 3':'none');
+}
+
+function curvedPath(d){
+  const sx=d.source.x,sy=d.source.y,tx=d.target.x,ty=d.target.y;
+  const dx=tx-sx,dy=ty-sy,dr=Math.sqrt(dx*dx+dy*dy)||1;
+  const ox=(dx/dr)*R,oy=(dy/dr)*R;
+  const x1=sx+ox,y1=sy+oy,x2=tx-ox,y2=ty-oy;
+  const mx=(x1+x2)/2,my=(y1+y2)/2;
+  const nx=-(y2-y1),ny=(x2-x1);
+  const nL=Math.sqrt(nx*nx+ny*ny)||1;
+  const c=Math.min(dr*0.12,20);
+  return`M${x1},${y1} Q${mx+nx/nL*c},${my+ny/nL*c} ${x2},${y2}`;
+}
+
+sim.on('tick',()=>{
+  N.forEach(d=>{d.x=Math.max(R+8,Math.min(W-R-8,d.x));d.y=Math.max(R+8,Math.min(H-R-26,d.y));});
+  links.attr('d',curvedPath);
+  gN.attr('transform',d=>`translate(${d.x},${d.y})`);
+});
+
+let selId=null;
+function showDetail(d){
+  const pan=document.getElementById('detail');
+  const ph=document.getElementById('placeholder');
+  if(selId===d.id){pan.classList.remove('open');ph.style.display='flex';selId=null;resetHL();return;}
+  selId=d.id;
+  ph.style.display='none';
+
+  highlightNode(d);
+
+  const deps=E.filter(e=>e.t===d.id).map(e=>N.find(n=>n.id===e.s)).filter(Boolean);
+  const unlocks=E.filter(e=>e.s===d.id).map(e=>N.find(n=>n.id===e.t)).filter(Boolean);
+  const st=data.status[d.id]||'not-started';
+  const note=data.notes[d.id]||'';
+  const checks=data.checks[d.id]||{};
+  const rtMap={video:'rt-video',docs:'rt-docs',course:'rt-course',tool:'rt-tool',practice:'rt-practice'};
+  const rtLabel={video:'Video',docs:'Docs',course:'Corso',tool:'Tool',practice:'Pratica'};
+  const pColors=[
+    {bg:'var(--p1bg)',t:'var(--p1t)',c:'var(--p1)'},
+    {bg:'var(--p2bg)',t:'var(--p2t)',c:'var(--p2)'},
+    {bg:'var(--p3bg)',t:'var(--p3t)',c:'var(--p3)'},
+    {bg:'var(--p4bg)',t:'var(--p4t)',c:'var(--p4)'}
+  ];
+  const pc2=pColors[d.phase];
+
+  const topicChecks=d.topics.map((t,i)=>{
+    const ck=checks['t'+i]?'checked':'';
+    const cls=checks['t'+i]?'check-item done':'check-item';
+    return`<label class="${cls}"><input type="checkbox" ${ck} onchange="toggleCheck(${d.id},'t${i}',this)"> ${t}</label>`;
+  }).join('');
+
+  const buildChecks=d.build.map((b,i)=>{
+    const ck=checks['b'+i]?'checked':'';
+    const cls=checks['b'+i]?'check-item done':'check-item';
+    return`<label class="${cls}"><input type="checkbox" ${ck} onchange="toggleCheck(${d.id},'b${i}',this)"> ${b}</label>`;
+  }).join('');
+
+  const totalChecks=d.topics.length+d.build.length;
+  let doneChecks=0;
+  d.topics.forEach((_,i)=>{if(checks['t'+i])doneChecks++;});
+  d.build.forEach((_,i)=>{if(checks['b'+i])doneChecks++;});
+  const progPct=totalChecks?Math.round(doneChecks/totalChecks*100):0;
+
+  pan.innerHTML=`
+<div class="dc-header">
+  <div class="dc-week" style="background:${pc2.bg};color:${pc2.t}">Settimana ${d.id}</div>
+  <div class="dc-title">${d.label}</div>
+  <div class="dc-phase">${pn[d.phase]} — Fase ${d.phase+1}</div>
+</div>
+<div class="dc-progress">
+  <div class="dc-progress-row">
+    <div class="dc-progress-bar"><div class="dc-progress-fill" style="width:${progPct}%;background:${pc2.c}"></div></div>
+    <div class="dc-progress-label">${progPct}%</div>
+  </div>
+  <div class="dc-status-btns">
+    <button class="status-btn ${st==='not-started'?'active not-started':''}" onclick="setStatus(${d.id},'not-started')">Da iniziare</button>
+    <button class="status-btn ${st==='progress'?'active in-progress':''}" onclick="setStatus(${d.id},'progress')">In corso</button>
+    <button class="status-btn ${st==='done'?'active':''}" onclick="setStatus(${d.id},'done')">Completata</button>
+  </div>
+</div>
+<div class="dc-body">
+  <div class="dc-section">
+    <div class="dc-label">Argomenti da studiare (${doneChecks} / ${totalChecks})</div>
+    ${topicChecks}
+  </div>
+  <div class="dc-section">
+    <div class="dc-label">Cosa costruire</div>
+    ${buildChecks}
+  </div>
+  <div class="dc-section">
+    <div class="dc-label">Outcome</div>
+    <div class="dc-outcome">${d.outcome}</div>
+  </div>
+  ${deps.length?`<div class="dc-section"><div class="dc-label">Dipende da</div><div class="dc-deps">${deps.map(x=>`<span class="dc-dep" style="background:${pbg[x.phase]};color:${ptx[x.phase]}" onclick="showDetail(N.find(n=>n.id===${x.id}))">${x.label}</span>`).join('')}</div></div>`:''}
+  ${unlocks.length?`<div class="dc-section"><div class="dc-label">Sblocca</div><div class="dc-deps">${unlocks.map(x=>`<span class="dc-dep" style="background:${pbg[x.phase]};color:${ptx[x.phase]}" onclick="showDetail(N.find(n=>n.id===${x.id}))">${x.label}</span>`).join('')}</div></div>`:''}
+  <div class="dc-section">
+    <div class="dc-label">Risorse consigliate</div>
+    ${d.resources.map(r=>`<div class="res-item"><span class="res-type ${rtMap[r.type]}">${rtLabel[r.type]}</span><span class="res-name">${r.name}</span><div class="res-desc">${r.desc}</div></div>`).join('')}
+  </div>
+</div>
+<div class="dc-notes">
+  <div class="dc-label">Le tue note</div>
+  <textarea id="note-area" placeholder="Scrivi qui appunti, riflessioni, link utili..." oninput="saveNote(${d.id})">${note}</textarea>
+  <div class="dc-notes-saved" id="note-saved">Salvato</div>
+</div>`;
+  pan.classList.add('open');
+  pan.scrollTo({top:0});
+}
+
+function highlightNode(d){
+  const connected=new Set([d.id]);
+  E.filter(e=>e.s===d.id||e.t===d.id).forEach(e=>{connected.add(e.s);connected.add(e.t);});
+  gN.transition().duration(200).style('opacity',nd=>connected.has(nd.id)?1:0.15);
+  gN.select('.node-circle').transition().duration(200)
+    .attr('r',nd=>nd.id===d.id?R+3:R)
+    .attr('stroke-width',nd=>nd.id===d.id?2.5:1.5);
+  links.transition().duration(200)
+    .style('opacity',l=>{
+      const si=typeof l.source==='object'?l.source.id:l.source;
+      const ti=typeof l.target==='object'?l.target.id:l.target;
+      return(si===d.id||ti===d.id)?0.8:0.05;
+    })
+    .attr('stroke-width',l=>{
+      const si=typeof l.source==='object'?l.source.id:l.source;
+      const ti=typeof l.target==='object'?l.target.id:l.target;
+      return(si===d.id||ti===d.id)?1.8:1;
+    })
+    .attr('stroke',l=>{
+      const si=typeof l.source==='object'?l.source.id:l.source;
+      const ti=typeof l.target==='object'?l.target.id:l.target;
+      if(si===d.id||ti===d.id) return ps[d.phase];
+      return dk?'#5F5E5A':'#B4B2A9';
+    });
+}
+
+function resetHL(){
+  gN.transition().duration(200).style('opacity',1);
+  gN.select('.node-circle').transition().duration(200).attr('r',R).attr('stroke-width',1.5);
+  links.transition().duration(200).style('opacity',0.45).attr('stroke-width',1).attr('stroke',dk?'#5F5E5A':'#B4B2A9');
+}
+
+let noteTimer=null;
+function saveNote(id){
+  clearTimeout(noteTimer);
+  noteTimer=setTimeout(()=>{
+    data.notes[id]=document.getElementById('note-area').value;
+    saveData(data);
+    updateStats();
+    const el=document.getElementById('note-saved');
+    el.classList.add('show');
+    setTimeout(()=>el.classList.remove('show'),1500);
+  },400);
+}
+
+function setStatus(id,st){
+  data.status[id]=st;
+  saveData(data);
+  updateStats();
+  const d=N.find(n=>n.id===id);
+  if(d) showDetail(d);
+}
+
+function toggleCheck(id,key,el){
+  if(!data.checks[id]) data.checks[id]={};
+  data.checks[id][key]=el.checked;
+  saveData(data);
+  el.parentElement.classList.toggle('done',el.checked);
+  const d=N.find(n=>n.id===id);
+  if(d) showDetail(d);
+}
+
+function filt(p,btn){
+  document.querySelectorAll('.ctrl-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  gN.transition().duration(300).style('opacity',d=>p===-1||d.phase===p?1:0.08);
+  links.transition().duration(300).style('opacity',l=>{
+    if(p===-1)return 0.45;
+    const si=typeof l.source==='object'?l.source.id:l.source;
+    const ti=typeof l.target==='object'?l.target.id:l.target;
+    const sp=N.find(n=>n.id===si).phase;
+    const tp=N.find(n=>n.id===ti).phase;
+    return(sp===p&&tp===p)?0.6:(sp===p||tp===p)?0.2:0.03;
+  });
+}
+
+updateStats();
+</script>
+</body>
+</html>
